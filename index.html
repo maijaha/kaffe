@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaffe arkitektur & design</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="stylesheet" href="main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <canvas class="logo-canvas"></canvas>
+            <img src="images/Full_logo_hvit.png" alt="Logo" class="logo logo-desktop">
+            <img src="images/Komprimert_logo_svart.png" alt="Logo" class="logo logo-mobile">
+        </div>
+        <nav class="social-nav">
+            <div class="nyheter-dropdown">
+                <a href="#" class="nyheter-link">
+                    <span class="nyheter-text">Nyheter</span>
+                    <div class="hamburger-menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </a>
+                <div class="nyheter-dropdown-content">
+                    <a href="images/OA artikkel.pdf" target="_blank" class="nyheter-dropdown-item">OA artikkel</a>
+                    <a href="https://norskeildsjeler.no/nyheter/kaffe-arkitektur-design-as-inngar-samarbeidsavtale-med-norske-ildsjeler" target="_blank" class="nyheter-dropdown-item">Norske ildsjeler</a>
+                    <div class="dropdown-social-links">
+                        <a href="https://www.facebook.com/p/Kaffe-Arkitektur-Design-61581807920812/" target="_blank" class="dropdown-facebook-link">
+                            <img src="images/FB_icon.webp" class="dropdown-facebook-logo">
+                        </a>
+                        <a href="https://www.instagram.com/kaffe.arkitekturogdesign?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="dropdown-instagram-link">
+                            <img src="images/Ig_icon.webp" class="dropdown-instagram-logo">
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <a href="https://www.facebook.com/p/Kaffe-Arkitektur-Design-61581807920812/" target="_blank" class="facebook-link">
+                <img src="images/FB_icon.webp" class="facebook-logo">
+            </a>
+            <a href="https://www.instagram.com/kaffe.arkitekturogdesign?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="instagram-link">
+                <img src="images/Ig_icon.webp" class="instagram-logo">
+            </a>
+        </nav>
+
+    </header>
+
+    <!-- Main Content with Video and Slogan -->
+    <main>
+        <div class="video-container">
+            <video autoplay loop muted playsinline class="background-video" preload="auto">
+                <source src="images/nettside loop.mp4" type="video/mp4">
+            </video>
+            <div class="video-play-overlay" id="videoPlayOverlay"></div>
+            <div class="slogan-overlay">
+                <h1><span class="vi-capital">Vi</span> tror at god arkitektur starter med en kopp <span class="kaffe-emphasis">kaffe.</span></h1>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content-box">
+            <div class= "in-between">Vi er i gang med å bygge nettside og gleder oss til å bygge med deg også.</div>
+            <a href="mailto:post@kad.no" class="footer-text">Ta kontakt for en prat og en kopp kaffe!</a>
+            <div class="contact-details">
+                <a href="mailto:post@kad.no" class="contact-link">post@kad.no</a>
+                <a href="tel:+4793629722" class="contact-link">+47 936 29 722</a>
+                <a href=https://www.google.com/maps/place/Kaffe+Arkitektur+%26+Design/@60.7950965,10.688303,232m/data=!3m2!1e3!4b1!4m6!3m5!1s0x4641db005f25f093:0x1a090cbcb6fc92c9!8m2!3d60.7950965!4d10.688303!16s%2Fg%2F11yl74kdz7?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D class="contact-link">Sommerfeldtsgate 4, Gjøvik</a>
+            </div>
+        </div>
+        <div class="footer-logo-left">
+            <img src="images/nal_liggende_rgb_pos.png" alt="NAL logo" class="footer-logo nal-logo">
+        </div>
+        <div class="footer-logo-right">
+            <img src="images/horisontal.png" alt="Arkitektur Bedriftene" class="footer-logo arkitektur-bedriftene-logo">
+        </div>
+    </footer>
+    <script>
+        // Logo blend effect with video background
+        (function() {
+            'use strict';
+            
+            function initLogoBlend() {
+                const logoCanvas = document.querySelector('.logo-canvas');
+                const video = document.querySelector('.background-video');
+                const logoContainer = document.querySelector('.logo-container');
+                const logoDesktop = document.querySelector('.logo-desktop');
+                const logoMobile = document.querySelector('.logo-mobile');
+                
+                if (!logoCanvas || !video || !logoContainer || !logoDesktop) {
+                    console.error('Required elements not found');
+                    return;
+                }
+                
+                const canvasCtx = logoCanvas.getContext('2d');
+                if (!canvasCtx) {
+                    console.error('Could not get canvas context');
+                    return;
+                }
+                
+                const logoImage = new Image();
+                
+                // Set image source directly to avoid CORS issues with local files
+                logoImage.src = 'images/Full_logo_hvit.png';
+                
+                let canvasWidth = 0;
+                let canvasHeight = 0;
+                let dpr = window.devicePixelRatio || 1;
+                
+                function isMobileBreakpoint() {
+                    return window.innerWidth <= 768;
+                }
+                
+                function resizeCanvas() {
+                    const containerRect = logoContainer.getBoundingClientRect();
+                    const containerHeight = containerRect.height;
+                    
+                    if (logoImage.complete && logoImage.naturalWidth > 0) {
+                        const logoAspect = logoImage.naturalWidth / logoImage.naturalHeight;
+                        canvasHeight = containerHeight;
+                        canvasWidth = canvasHeight * logoAspect;
+                    } else {
+                        canvasWidth = containerRect.width || 200;
+                        canvasHeight = containerHeight || 60;
+                    }
+                    
+                    // Set display size (logical pixels)
+                    logoCanvas.style.width = canvasWidth + 'px';
+                    logoCanvas.style.height = canvasHeight + 'px';
+                    
+                    // Set internal resolution for high-DPI displays
+                    dpr = window.devicePixelRatio || 1;
+                    const internalWidth = Math.round(canvasWidth * dpr);
+                    const internalHeight = Math.round(canvasHeight * dpr);
+                    
+                    // Set actual canvas dimensions (physical pixels)
+                    if (logoCanvas.width !== internalWidth || logoCanvas.height !== internalHeight) {
+                        logoCanvas.width = internalWidth;
+                        logoCanvas.height = internalHeight;
+                    }
+                }
+                
+                // Set crossOrigin only if not on file:// protocol (needed for canvas operations)
+                if (window.location.protocol !== 'file:') {
+                    video.crossOrigin = 'anonymous';
+                }
+                
+                // Handle video errors
+                video.addEventListener('error', function(e) {
+                    console.error('Video error:', video.error, video.error?.code);
+                    // Fallback: show static logo
+                    if (!isMobileBreakpoint() && logoDesktop) {
+                        logoCanvas.style.display = 'none';
+                        logoDesktop.style.display = 'block';
+                    }
+                });
+                
+                // Handle video load success
+                video.addEventListener('loadedmetadata', function() {
+                    console.log('Video metadata loaded:', video.videoWidth, 'x', video.videoHeight);
+                });
+                
+                function updateLogoBlend() {
+                    // Stop animation on mobile breakpoint
+                    if (isMobileBreakpoint()) {
+                        return;
+                    }
+                    
+                    // Check if video is ready (readyState 2 = HAVE_CURRENT_DATA, 3 = HAVE_FUTURE_DATA, 4 = HAVE_ENOUGH_DATA)
+                    if (video.readyState < 2 || !video.videoWidth || !video.videoHeight || !logoImage.complete || !canvasWidth || !canvasHeight) {
+                        return;
+                    }
+                    
+                    const containerRect = logoContainer.getBoundingClientRect();
+                    const videoRect = video.getBoundingClientRect();
+                    
+                    if (containerRect.width === 0 || containerRect.height === 0 || videoRect.width === 0 || videoRect.height === 0) {
+                        return;
+                    }
+                    
+                    const logoCenterX = containerRect.left + containerRect.width / 2;
+                    const logoCenterY = containerRect.top + containerRect.height / 2;
+                    
+                    const videoCenterX = ((logoCenterX - videoRect.left) / videoRect.width) * video.videoWidth;
+                    const videoCenterY = ((logoCenterY - videoRect.top) / videoRect.height) * video.videoHeight;
+                    
+                    const videoWidth = (canvasWidth / videoRect.width) * video.videoWidth;
+                    const videoHeight = (canvasHeight / videoRect.height) * video.videoHeight;
+                    
+                    let videoX = Math.max(0, Math.min(videoCenterX - videoWidth / 2, video.videoWidth - videoWidth));
+                    let videoY = Math.max(0, Math.min(videoCenterY - videoHeight / 2, video.videoHeight - videoHeight));
+                    
+                    try {
+                        const internalWidth = Math.round(canvasWidth * dpr);
+                        const internalHeight = Math.round(canvasHeight * dpr);
+                        
+                        // Ensure canvas dimensions are set
+                        if (logoCanvas.width !== internalWidth || logoCanvas.height !== internalHeight) {
+                            logoCanvas.width = internalWidth;
+                            logoCanvas.height = internalHeight;
+                        }
+                        
+                        // Clear canvas using internal dimensions
+                        canvasCtx.clearRect(0, 0, internalWidth, internalHeight);
+                        
+                        // Try to draw video section behind logo
+                        try {
+                            canvasCtx.drawImage(video, videoX, videoY, videoWidth, videoHeight, 0, 0, internalWidth, internalHeight);
+                        } catch (drawError) {
+                            // CORS or security error - can't draw video to canvas
+                            console.warn('Cannot draw video to canvas (CORS/security):', drawError.message);
+                            // Fallback: just draw the logo without blend
+                            drawLogoFallback();
+                            return;
+                        }
+                        
+                        // Get video image data
+                        const videoImageData = canvasCtx.getImageData(0, 0, internalWidth, internalHeight);
+                        const videoData = videoImageData.data;
+                        
+                        // Clear and draw logo using internal dimensions
+                        canvasCtx.clearRect(0, 0, internalWidth, internalHeight);
+                        canvasCtx.drawImage(logoImage, 0, 0, internalWidth, internalHeight);
+                        
+                        // Get logo image data
+                        const logoImageData = canvasCtx.getImageData(0, 0, internalWidth, internalHeight);
+                        const logoData = logoImageData.data;
+                        
+                        // Apply difference blend mode
+                        for (let i = 0; i < logoData.length; i += 4) {
+                            if (logoData[i + 3] > 0) {
+                                logoData[i] = Math.abs(videoData[i] - logoData[i]);
+                                logoData[i + 1] = Math.abs(videoData[i + 1] - logoData[i + 1]);
+                                logoData[i + 2] = Math.abs(videoData[i + 2] - logoData[i + 2]);
+                            } else {
+                                logoData[i + 3] = 0;
+                            }
+                        }
+                        
+                        // Put blended image data back
+                        canvasCtx.putImageData(logoImageData, 0, 0);
+                    } catch (e) {
+                        console.error('Blend error:', e);
+                        // Fallback: just draw the logo without blend
+                        drawLogoFallback();
+                    }
+                }
+                
+                function handleResize() {
+                    if (isMobileBreakpoint()) {
+                        logoCanvas.style.display = 'none';
+                        if (logoDesktop) logoDesktop.style.display = 'none';
+                        if (logoMobile) logoMobile.style.display = 'block';
+                    } else {
+                        logoCanvas.style.display = 'block';
+                        logoCanvas.style.visibility = 'visible';
+                        if (logoDesktop) logoDesktop.style.display = 'none';
+                        if (logoMobile) logoMobile.style.display = 'none';
+                        resizeCanvas();
+                        // Force a redraw after resize
+                        setTimeout(updateLogoBlend, 50);
+                    }
+                }
+                
+                logoImage.onerror = function() {
+                    console.error('Failed to load logo image from:', logoImage.src);
+                    // Fallback: show the desktop logo image if canvas fails
+                    if (!isMobileBreakpoint() && logoDesktop) {
+                        logoCanvas.style.display = 'none';
+                        logoDesktop.style.display = 'block';
+                    }
+                };
+                
+                // Fallback function to draw logo without blend if blend fails
+                function drawLogoFallback() {
+                    try {
+                        const internalWidth = Math.round(canvasWidth * dpr);
+                        const internalHeight = Math.round(canvasHeight * dpr);
+                        canvasCtx.clearRect(0, 0, internalWidth, internalHeight);
+                        canvasCtx.drawImage(logoImage, 0, 0, internalWidth, internalHeight);
+                    } catch (e) {
+                        console.error('Fallback draw error:', e);
+                    }
+                }
+                
+                logoImage.onload = function() {
+                    if (!logoImage.naturalWidth || !logoImage.naturalHeight) {
+                        console.error('Logo image loaded but has invalid dimensions');
+                        if (!isMobileBreakpoint() && logoDesktop) {
+                            logoCanvas.style.display = 'none';
+                            logoDesktop.style.display = 'block';
+                        }
+                        return;
+                    }
+                    
+                    resizeCanvas();
+                    // Draw logo immediately as fallback
+                    if (!isMobileBreakpoint()) {
+                        drawLogoFallback();
+                    }
+                    
+                    setTimeout(function() {
+                        resizeCanvas();
+                        // Initial check
+                        handleResize();
+                    }, 100);
+                    
+                    // Wait for video to be ready
+                    function setupVideoListeners() {
+                        
+                        function onVideoReady() {
+                            if (video.readyState >= 2 && video.videoWidth > 0) {
+                                handleResize();
+                            }
+                        }
+                        
+                        if (video.readyState >= 2 && video.videoWidth > 0) {
+                            onVideoReady();
+                        } else {
+                            video.addEventListener('loadeddata', onVideoReady, { once: true });
+                            video.addEventListener('loadedmetadata', onVideoReady, { once: true });
+                            video.addEventListener('canplay', onVideoReady, { once: true });
+                        }
+                    }
+                    
+                    // Update on video time updates
+                    video.addEventListener('timeupdate', function() {
+                        if (!isMobileBreakpoint()) {
+                            updateLogoBlend();
+                        }
+                    });
+                    
+                    window.addEventListener('resize', function() {
+                        handleResize();
+                    });
+                    
+                    // Start update loop
+                    const updateInterval = setInterval(function() {
+                        if (!isMobileBreakpoint()) {
+                            updateLogoBlend();
+                        }
+                    }, 100);
+                    
+                    const observer = new MutationObserver(function() {
+                        if (!isMobileBreakpoint()) {
+                            resizeCanvas();
+                            updateLogoBlend();
+                        }
+                    });
+                    observer.observe(logoContainer, { 
+                        attributes: true, 
+                        attributeFilter: ['style', 'class'] 
+                    });
+                };
+                
+                // If image is already loaded (cached), trigger onload manually
+                if (logoImage.complete && logoImage.naturalWidth > 0) {
+                    setTimeout(function() {
+                        logoImage.onload();
+                    }, 50);
+                }
+            }
+            
+            // Wait for DOM to be ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLogoBlend);
+            } else {
+                initLogoBlend();
+            }
+        })();
+        
+        // Basic video autoplay for iOS Safari + mobile-synced horizontal pan
+        (function() {
+            const video = document.querySelector('.background-video');
+            const overlay = document.getElementById('videoPlayOverlay');
+            if (!video) return;
+
+            // Ensure attributes for autoplay
+            video.muted = true;
+            video.volume = 0;
+            video.playsInline = true;
+            video.setAttribute('muted', '');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('preload', 'auto');
+
+            function isMobile() {
+                return window.innerWidth <= 850;
+            }
+
+            // Try a simple autoplay; browser may still require interaction on some devices
+            function tryPlay() {
+                const p = video.play();
+                if (p && p.catch) {
+                    p.catch(function() {
+                        // If autoplay fails, keep overlay so first tap starts video
+                        if (overlay) overlay.style.display = 'block';
+                    });
+                }
+            }
+
+            // Start trying once metadata is ready
+            video.addEventListener('loadedmetadata', tryPlay, { once: true });
+
+            // Overlay click/touch to start video if needed
+            if (overlay) {
+                const startOnInteraction = function(e) {
+                    e.preventDefault();
+                    tryPlay();
+                    overlay.style.display = 'none';
+                };
+                overlay.addEventListener('click', startOnInteraction, { passive: false });
+                overlay.addEventListener('touchstart', startOnInteraction, { passive: false });
+            }
+
+            // Mobile-only horizontal pan synced to video time
+            function startPan() {
+                let lastWidth = window.innerWidth;
+
+                function updatePan() {
+                    if (!isMobile()) {
+                        // Reset on desktop
+                        video.style.objectPosition = '';
+                        requestAnimationFrame(updatePan);
+                        return;
+                    }
+
+                    const duration = video.duration || 25; // fallback if metadata missing
+                    const t = video.currentTime || 0;
+
+                    // 0–8s: hold slightly right of center
+                    // 8–10s: pan a bit further right
+                    // 10s–end: pan back left (but not all the way)
+                    const nudgeStart = 8;
+                    const panStart = 10;
+                    const startPos = 60; // baseline a bit right of center
+                    const nudgePos = 75; // slight extra pan to the right
+                    const endPos = 15;   // stop a bit before fully left
+                    let pos;
+                    if (t <= nudgeStart) {
+                        // Hold baseline
+                        pos = startPos;
+                    } else if (t <= panStart) {
+                        // Ease from baseline to slightly more right between 8s and 10s
+                        const fracNudge = (t - nudgeStart) / (panStart - nudgeStart);
+                        pos = startPos + (nudgePos - startPos) * fracNudge;
+                    } else {
+                        // From 10s to end, pan back left towards endPos
+                        const span = Math.max(duration - panStart, 0.1);
+                        const frac = Math.min((t - panStart) / span, 1);
+                        pos = nudgePos + (endPos - nudgePos) * frac; // interpolate nudgePos -> endPos
+                    }
+
+                    video.style.objectPosition = pos + '% center';
+                    requestAnimationFrame(updatePan);
+                }
+
+                requestAnimationFrame(updatePan);
+
+                // If orientation/width changes, keep behavior consistent
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth !== lastWidth) {
+                        lastWidth = window.innerWidth;
+                    }
+                });
+            }
+
+            if (video.readyState >= 1) {
+                startPan();
+            } else {
+                video.addEventListener('loadedmetadata', startPan, { once: true });
+            }
+        })();
+
+        // Dropdown toggle for mobile
+        (function() {
+            const nyheterDropdown = document.querySelector('.nyheter-dropdown');
+            const nyheterLink = document.querySelector('.nyheter-link');
+            
+            if (nyheterDropdown && nyheterLink) {
+                // Toggle dropdown on click for mobile
+                nyheterLink.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 850) {
+                        e.preventDefault();
+                        nyheterDropdown.classList.toggle('active');
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 850 && !nyheterDropdown.contains(e.target)) {
+                        nyheterDropdown.classList.remove('active');
+                    }
+                });
+            }
+        })();
+
+        // Footer content box toggle for mobile
+        (function() {
+            const footerContentBox = document.querySelector('.footer-content-box');
+            const footerText = document.querySelector('.footer-text');
+            const inBetween = document.querySelector('.in-between');
+            
+            if (footerContentBox) {
+                // On mobile, clicking footer-text or in-between should toggle menu, not open mailto
+                if (footerText) {
+                    footerText.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 850) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            footerContentBox.classList.toggle('active');
+                        }
+                    });
+                }
+                
+                if (inBetween) {
+                    inBetween.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 850) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            footerContentBox.classList.toggle('active');
+                        }
+                    });
+                }
+                
+                // Close when clicking outside on mobile
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 850) {
+                        // If clicking on a contact link, close the menu but let the link work
+                        if (e.target.classList.contains('contact-link')) {
+                            footerContentBox.classList.remove('active');
+                            return; // Let the link work normally
+                        }
+                        // Close if clicking outside the footer-content-box
+                        if (!footerContentBox.contains(e.target)) {
+                            footerContentBox.classList.remove('active');
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
